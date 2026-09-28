@@ -1,0 +1,70 @@
+{
+  "name": "@richardmcquiston01/maker-export",
+  "version": "0.1.0",
+  "description": "Framework-free export engine for maker tools: one neutral design model written out as SVG, DXF, LightBurn, and xTool XCS cut/engrave files.",
+  "keywords": [
+    "laser-cutting",
+    "vinyl-cutting",
+    "cnc",
+    "svg",
+    "dxf",
+    "lightburn",
+    "xtool",
+    "xcs",
+    "export"
+  ],
+  "license": "Apache-2.0",
+  "author": "Richard McQuiston",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RichardMcQuiston01/makertool-maker-export.git"
+  },
+  "homepage": "https://github.com/RichardMcQuiston01/makertool-maker-export#readme",
+  "bugs": {
+    "url": "https://github.com/RichardMcQuiston01/makertool-maker-export/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build",
+    "prepare": "npm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^9.1.2",
+    "prettier": "^3.9.9",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^5.0.2"
+  }
+}
