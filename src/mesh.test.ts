@@ -200,4 +200,46 @@ describe('docToMeshes', () => {
     const names = docToMeshes(doc).meshes.map((m) => m.name)
     expect(names).toEqual(['CUT', 'ENGRAVE 1', 'ENGRAVE 2'])
   })
+
+  test('touching and overlapping shapes still make closed solids', () => {
+    // QR-style modules sharing edges, and two squares overlapping.
+    const doc: ExportDoc = {
+      widthMm: 40,
+      heightMm: 40,
+      layers: [
+        {
+          kind: 'engrave',
+          paths: [
+            square(0, 0, 5),
+            square(5, 0, 5),
+            square(5, 5, 5),
+            square(20, 20, 10),
+            square(25, 25, 10),
+          ],
+        },
+      ],
+    }
+    const [mesh] = docToMeshes(doc).meshes
+    expect(isClosedManifold(mesh.triangles)).toBe(true)
+    // Three 25 mm² modules, plus the two 100 mm² squares even-odd: their
+    // 25 mm² overlap is left open, as an even-odd fill draws it.
+    expect(volume(mesh.triangles)).toBeCloseTo((75 + 200 - 2 * 25) * 1, 1)
+  })
+
+  test('a letter counter inside overlapping artwork stays open', () => {
+    const doc: ExportDoc = {
+      widthMm: 40,
+      heightMm: 40,
+      layers: [
+        {
+          kind: 'cut',
+          paths: [square(0, 0, 20), square(5, 5, 10), square(15, 15, 10)],
+        },
+      ],
+    }
+    const [mesh] = docToMeshes(doc).meshes
+    expect(isClosedManifold(mesh.triangles)).toBe(true)
+    // 400 − 100 (counter) + 100 − 2 × 25 (the third square, even-odd).
+    expect(volume(mesh.triangles)).toBeCloseTo((400 - 100 + 100 - 50) * 3, 0)
+  })
 })

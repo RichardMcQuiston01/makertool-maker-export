@@ -19,6 +19,8 @@
  * outward-facing (counter-clockwise) triangles.
  */
 import earcut from 'earcut'
+import * as polygonClippingModule from 'polygon-clipping'
+import type { MultiPolygon, Polygon } from 'polygon-clipping'
 import { outlineDocText, type Point2, type TextOutliner } from './text.ts'
 import {
   layerColor,
@@ -167,6 +169,106 @@ type Tri2 = [Point2, Point2, Point2]
 const DEGENERATE_AREA = 1e-10
 /** A vertex this close (mm) to an edge's line lies on it. */
 const ON_EDGE_TOLERANCE = 1e-7
+
+type PolygonClipping = typeof polygonClippingModule
+
+// polygon-clipping's ESM build has only a default export, while its CommonJS
+// build (and its typings) expose named functions. Accept either.
+const clip: PolygonClipping =
+  (polygonClippingModule as unknown as { default?: PolygonClipping }).default ??
+  polygonClippingModule
+
+/**
+ * The even-odd region of a set of rings as clean shapes: no two overlap or
+ * share an edge. Overlapping rings follow the even-odd rule (as an even-odd
+ * SVG fill draws them), shapes that touch are merged, and a counter inside a
+ * letter stays a hole. This is what lets touching artwork — QR modules, board
+ * squares, overlapping motif strokes — extrude into closed, manifold solids.
+ * Falls back to plain nesting ({@link ringsToShapes}) if clipping fails.
+ */
+export function regionShapes(rings: Point2[][]): Shape2D[] {
+  const cleaned = rings
+    .map(cleanRing)
+    .filter((ring) => ring.length >= 3 && ringSignedArea(ring) !== 0)
+  if (cleaned.length <= 1) return ringsToShapes(cleaned)
+  let region: MultiPolygon
+  try {
+    const polygons: Polygon[] = cleaned.map((ring) => [
+      ring.map((p): [number, number] => [p.x, p.y]),
+    ])
+    region = clip.xor(polygons[0], ...polygons.slice(1))
+  } catch {
+    return ringsToShapes(cleaned)
+  }
+  const toRing = (ring: [number, number][]): Point2[] =>
+    cleanRing(ring.map(([x, y]) => ({ x, y })))
+  const shapes: Shape2D[] = []
+  for (const [outer, ...holes] of region) {
+    const outerRing = toRing(outer)
+    if (outerRing.length < 3 || ringSignedArea(outerRing) === 0) continue
+    shapes.push({
+      outer: orientRing(outerRing, true),
+      holes: holes
+        .map(toRing)
+        .filter((h) => h.length >= 3 && ringSignedArea(h) !== 0)
+        .map((h) => orientRing(h, false)),
+    })
+  }
+  return separatePinches(shapes)
+}
+
+/** How far a pinched corner is pulled into its own piece, mm. */
+const PINCH_NUDGE_MM = 0.001
+
+/**
+ * Where two pieces (or a piece and a hole) meet at a single corner, the
+ * extruded walls would share a vertical edge, which isn't manifold. Every ring
+ * keeps its filled side on the left, so each copy of such a corner owns the
+ * sector just counter-clockwise of its outgoing edge (up to the next edge
+ * meeting there); the copy is pulled {@link PINCH_NUDGE_MM} into the middle of
+ * that sector, which separates the solids without crossing any edge.
+ */
+function separatePinches(shapes: Shape2D[]): Shape2D[] {
+  const key = (p: Point2): string => `${p.x},${p.y}`
+  const rings = shapes.flatMap((shape) => [shape.outer, ...shape.holes])
+  // Every edge direction leaving each vertex, from every ring that visits it.
+  const spokes = new Map<string, number[]>()
+  for (const ring of rings) {
+    ring.forEach((c, i) => {
+      const prev = ring[(i - 1 + ring.length) % ring.length]
+      const next = ring[(i + 1) % ring.length]
+      const list = spokes.get(key(c)) ?? []
+      list.push(
+        Math.atan2(next.y - c.y, next.x - c.x),
+        Math.atan2(prev.y - c.y, prev.x - c.x),
+      )
+      spokes.set(key(c), list)
+    })
+  }
+  const pinched = (p: Point2): boolean => (spokes.get(key(p))?.length ?? 0) > 2
+  if (!rings.some((ring) => ring.some(pinched))) return shapes
+  const nudge = (ring: Point2[]): Point2[] =>
+    ring.map((c, i) => {
+      if (!pinched(c)) return c
+      const next = ring[(i + 1) % ring.length]
+      const out = Math.atan2(next.y - c.y, next.x - c.x)
+      let sector = 2 * Math.PI
+      for (const angle of spokes.get(key(c)) ?? []) {
+        let delta = angle - out
+        while (delta <= 1e-12) delta += 2 * Math.PI
+        if (delta < sector) sector = delta
+      }
+      const mid = out + sector / 2
+      return {
+        x: c.x + Math.cos(mid) * PINCH_NUDGE_MM,
+        y: c.y + Math.sin(mid) * PINCH_NUDGE_MM,
+      }
+    })
+  return shapes.map((shape) => ({
+    outer: nudge(shape.outer),
+    holes: shape.holes.map(nudge),
+  }))
+}
 
 /**
  * Buckets the shape's vertices on a grid so each triangle edge only tests the
@@ -354,7 +456,7 @@ export function docToMeshes(
   const meshes: Mesh[] = []
   const cutLayers = outlined.filter((l) => l.kind === 'cut')
   const plate = extrudeShapes(
-    ringsToShapes(closedRings(cutLayers, doc.heightMm)),
+    regionShapes(closedRings(cutLayers, doc.heightMm)),
     0,
     thickness,
   )
@@ -369,7 +471,7 @@ export function docToMeshes(
   const engraveLayers = outlined.filter((l) => l.kind === 'engrave')
   engraveLayers.forEach((layer, i) => {
     const triangles = extrudeShapes(
-      ringsToShapes(closedRings([layer], doc.heightMm)),
+      regionShapes(closedRings([layer], doc.heightMm)),
       base,
       base + engraveHeight,
     )
