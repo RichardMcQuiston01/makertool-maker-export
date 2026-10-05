@@ -90,6 +90,24 @@ generateExportFiles(doc, {
 // → keychain-laser.lbrn2, keychain-vinyl.svg
 ```
 
+### Filled engraving
+
+Set `fill: true` on an engrave layer to have the SVG writer paint its closed
+paths (and text) solid instead of stroking them, with each layer's contours
+merged into one even-odd path so letter counters stay open. DXF, LightBurn and
+XCS still write the outlines.
+
+### Atomm
+
+`renderSvg(doc, { profile: 'atomm' })` writes the SVG in
+[Atomm](https://www.atomm.com)'s processing colours (red stroke = cut, blue
+stroke = line engrave, blue fill = fill engrave) so the platform can pre-assign
+each element's processing type. `exportForAtomm(doc, intent, { baseName })`
+builds the file set Atomm's `export` hook expects (`'openInStudio'`: one SVG;
+`'download'`: the SVG plus any `extraFormats` and per-machine files) and
+returns a result with descriptive errors. `findAtommSvgIssues(svg)` lists the
+SVG features Atomm silently ignores.
+
 ### Text
 
 SVG keeps `texts` as live text. For formats where text should be outlines,

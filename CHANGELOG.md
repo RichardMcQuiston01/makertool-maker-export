@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Synced with Maker Template Pro's export core:
+  - **Filled engraving:** `ExportLayer.fill` makes the SVG writer paint a
+    layer's closed paths solid, merging its contours into one even-odd path so
+    letter counters stay open.
+  - **Atomm support:** `renderSvg(doc, { profile: 'atomm' })` (Atomm's
+    processing colours, `ATOMM_COLOR`), `exportForAtomm` for Atomm's export
+    hook, and `findAtommSvgIssues`.
+
 ## [0.1.0] - 2026-09-28
 
 ### Added
