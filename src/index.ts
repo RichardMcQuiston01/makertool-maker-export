@@ -14,7 +14,20 @@ export {
   type SvgOptions,
   type SvgProfile,
 } from './svg.ts'
-export { renderDxf } from './dxf.ts'
+export { renderDxf, type DxfOptions, type DxfVersion } from './dxf.ts'
+export {
+  fitArcs,
+  DEFAULT_ARC_TOLERANCE_MM,
+  type BulgeVertex,
+  type FittedPath,
+} from './arcs.ts'
+export {
+  renderHpgl,
+  HPGL_MIME,
+  HPGL_UNITS_PER_MM,
+  type HpglOptions,
+} from './hpgl.ts'
+export { renderPdf, PDF_MIME, type PdfOptions } from './pdf.ts'
 export { renderLightBurn } from './lightburn.ts'
 export { renderXcs } from './xcs.ts'
 export {
@@ -35,6 +48,7 @@ export {
   type ExportFormatId,
   type ExportFile,
   type ExportOptions,
+  type FormatOptions,
 } from './multimodal.ts'
 export {
   exportForAtomm,
