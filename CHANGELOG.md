@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **DXF for CNC, waterjet and plasma:** `renderDxf(doc, options)` takes
+  `arcs: true` to fit circular arcs (and whole circles) onto curved runs
+  within `arcToleranceMm` (default 0.01 mm), and `version: 'R12'` for the
+  AC1009 dialect older controllers need. Default output is unchanged.
+- **HPGL** (`renderHpgl`, `.plt`) for vinyl and drag-knife cutters and pen
+  plotters, with a pen per layer kind and an optional overcut.
+- **PDF** (`renderPdf`, `.pdf`): single-page vector PDF with hairline
+  strokes, solid fill layers and native Helvetica text, with no dependencies.
+- `generateExportFiles` offers `hpgl` and `pdf`, and passes per-format writer
+  options through `formatOptions`. PDF is allowed for every machine, and HPGL
+  for vinyl. Default selections are unchanged.
+- `fitArcs` and its `BulgeVertex` / `FittedPath` types are exported.
+
 ## [0.2.0] - 2026-10-05
 
 ### Added

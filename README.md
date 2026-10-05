@@ -4,14 +4,16 @@ Framework-free export engine for maker tools. Describe a design once, as a
 neutral **`ExportDoc`** (a sheet size plus layers of cut and engrave
 geometry), then write it out as:
 
-| Format    | Writer            | File     | Used by                         |
-| --------- | ----------------- | -------- | ------------------------------- |
-| SVG       | `renderSvg`       | `.svg`   | Anything; vinyl and print tools |
-| DXF       | `renderDxf`       | `.dxf`   | CAD, CNC, most laser software   |
-| LightBurn | `renderLightBurn` | `.lbrn2` | LightBurn (engrave layers fill) |
-| xTool XCS | `renderXcs`       | `.xcs`   | xTool Creative Space            |
-| STL       | `renderStl`       | `.stl`   | 3D printing: any slicer         |
-| 3MF       | `render3mf`       | `.3mf`   | 3D printing, multi-colour       |
+| Format    | Writer            | File     | Used by                                                |
+| --------- | ----------------- | -------- | ------------------------------------------------------ |
+| SVG       | `renderSvg`       | `.svg`   | Anything; vinyl and print tools                        |
+| DXF       | `renderDxf`       | `.dxf`   | CAD, CNC, waterjet, plasma, most laser software        |
+| LightBurn | `renderLightBurn` | `.lbrn2` | LightBurn (engrave layers fill)                        |
+| xTool XCS | `renderXcs`       | `.xcs`   | xTool Creative Space                                   |
+| HPGL      | `renderHpgl`      | `.plt`   | Vinyl and drag-knife cutters, pen plotters             |
+| PDF       | `renderPdf`       | `.pdf`   | Shops, print-driver lasers (Epilog, Trotec, Glowforge) |
+| STL       | `renderStl`       | `.stl`   | 3D printing: any slicer                                |
+| 3MF       | `render3mf`       | `.3mf`   | 3D printing, multi-colour                              |
 
 It has no DOM or framework code, so it runs the same in the browser, in Node
 (20.19+), and in Bun. Its one runtime dependency is
@@ -153,6 +155,51 @@ z-up, and every body is a closed, manifold solid.
 Open paths enclose no area, so they're skipped, as is text unless you pass an
 `outliner`. `docToMeshes(doc, options)` returns the triangles themselves,
 along with how many paths and texts were skipped, so a UI can warn about them.
+
+### CNC, waterjet and plasma (DXF options)
+
+`renderDxf(doc)` writes AutoCAD 2000 DXF with every path as a polyline of
+straight segments. Two options make it friendlier to cutting machines:
+
+- `arcs: true` fits circular arcs back onto curved runs (and writes a closed
+  path that's a whole circle as a `CIRCLE`). Controllers cut a run of tiny
+  segments by slowing at every vertex, which leaves faceted edges; arcs cut
+  smoothly, and the file is a fraction of the size. Every original vertex stays
+  within `arcToleranceMm` (default 0.01 mm) of the result, corners are kept
+  exactly, and deliberate polygons are never turned into circles.
+- `version: 'R12'` writes the older AC1009 dialect (`POLYLINE`/`VERTEX`)
+  that some controllers and shop software still require.
+
+```ts
+renderDxf(doc, { arcs: true, version: 'R12' })
+// or, through the multi-format API:
+generateExportFiles(doc, {
+  mode: 'split',
+  baseName: 'part',
+  formatOptions: { dxf: { arcs: true } },
+})
+```
+
+`fitArcs(points, closed, tolerance)` is exported for writers of other
+formats.
+
+### Vinyl cutters (HPGL)
+
+`renderHpgl(doc, options)` writes HPGL in plotter units (0.025 mm), y-up. HPGL
+has pens, not layers: CUT plots with pen 1 and ENGRAVE with pen 2 (`pens`
+changes that, and `kinds` limits which layers are plotted). `overcutMm` cuts
+that far past the start of each closed shape, so a drag knife separates it
+cleanly. HPGL can't place text, so pass an outliner (or `outlineDocText`) to
+include text.
+
+### PDF
+
+`renderPdf(doc, options)` writes a one-page vector PDF the size of the sheet.
+Paths are 0.001″ hairlines (`strokeWidthMm` changes that), which print-driver
+lasers treat as vector cuts; fill layers are painted solid. Text is real
+Helvetica text (a standard PDF font, so nothing is embedded), placed and
+anchored like the SVG writer's. The PDF is plain ASCII, so it's an ordinary
+string like the other formats.
 
 ### Geometry helpers
 
