@@ -163,4 +163,40 @@ describe('generateExportFiles — split', () => {
     // Laser still emits its defaults.
     expect(files.some((f) => f.name.startsWith('box-laser'))).toBe(true)
   })
+
+  test('HPGL and PDF are available, and format options reach the writers', () => {
+    const doc: ExportDoc = {
+      widthMm: 30,
+      heightMm: 30,
+      layers: [
+        {
+          kind: 'cut',
+          machine: 'vinyl',
+          paths: [
+            {
+              closed: true,
+              points: Array.from({ length: 48 }, (_, i) => ({
+                x: 15 + 10 * Math.cos((2 * Math.PI * i) / 48),
+                y: 15 + 10 * Math.sin((2 * Math.PI * i) / 48),
+              })),
+            },
+          ],
+        },
+      ],
+    }
+    const files = generateExportFiles(doc, {
+      mode: 'split',
+      baseName: 'decal',
+      formats: { vinyl: ['hpgl', 'pdf', 'dxf'] },
+      formatOptions: { dxf: { arcs: true }, pdf: { title: 'Decal' } },
+    })
+    expect(files.map((f) => [f.name, f.mime])).toEqual([
+      ['decal-vinyl.plt', 'application/vnd.hp-hpgl'],
+      ['decal-vinyl.pdf', 'application/pdf'],
+      ['decal-vinyl.dxf', 'application/dxf'],
+    ])
+    expect(files[0].content.startsWith('IN;')).toBe(true)
+    expect(files[1].content).toContain('/Title (Decal)')
+    expect(files[2].content).toContain('\nCIRCLE\n')
+  })
 })
