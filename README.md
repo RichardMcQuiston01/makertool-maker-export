@@ -10,9 +10,12 @@ geometry), then write it out as:
 | DXF       | `renderDxf`       | `.dxf`   | CAD, CNC, most laser software   |
 | LightBurn | `renderLightBurn` | `.lbrn2` | LightBurn (engrave layers fill) |
 | xTool XCS | `renderXcs`       | `.xcs`   | xTool Creative Space            |
+| STL       | `renderStl`       | `.stl`   | 3D printing: any slicer         |
+| 3MF       | `render3mf`       | `.3mf`   | 3D printing, multi-colour       |
 
-It has no runtime dependencies and no DOM or framework code, so it runs the
-same in the browser, in Node (18+), and in Bun. It was extracted from the
+It has no DOM or framework code, so it runs the same in the browser, in Node
+(20.19+), and in Bun. Its one runtime dependency is
+[earcut](https://github.com/mapbox/earcut), which triangulates the 3D formats. It was extracted from the
 [Maker Template Pro](https://github.com/RichardMcQuiston01/maker-template-pro)
 tools, where every tool exports through it.
 
@@ -118,6 +121,38 @@ one: give it a font library's path commands for the text laid out at the
 origin (e.g. opentype.js `font.getPath(text.value, 0, 0, text.sizeMm).commands`)
 and it returns closed outline paths placed, anchored and rotated exactly as the
 SVG writer places live text.
+
+### 3D printing (STL and 3MF)
+
+The 3D writers extrude the flat design into solids:
+
+- the **cut** layers' closed paths, combined even-odd (so holes and letter
+  counters stay open), become a base plate `thicknessMm` thick (default 3);
+- each **engrave** layer's closed paths become raised artwork
+  `engraveHeightMm` tall (default 1) on top of the plate, or on the bed when
+  there is no plate. `omitEngrave: true` leaves them out.
+
+```ts
+import { render3mf, renderStl } from '@richardmcquiston01/maker-export'
+
+const stl: Uint8Array = renderStl(doc, { thicknessMm: 2, name: 'tag' })
+const threeMf: Uint8Array = render3mf(doc, {
+  thicknessMm: 2,
+  engraveHeightMm: 0.6,
+  outliner, // so text is extruded too
+})
+```
+
+`renderStl` writes binary STL (`renderStlAscii` writes ASCII); STL has no
+colour, so every body goes into one solid. `render3mf` keeps each body as a
+separate part coloured after its layer, grouped as one object, so a slicer can
+print the engraving in a second filament. Both return bytes, so wrap them in a
+`Blob` (`STL_MIME`, `THREE_MF_MIME`) to download. Output is millimetres and
+z-up, and every body is a closed, manifold solid.
+
+Open paths enclose no area, so they're skipped, as is text unless you pass an
+`outliner`. `docToMeshes(doc, options)` returns the triangles themselves,
+along with how many paths and texts were skipped, so a UI can warn about them.
 
 ### Geometry helpers
 
