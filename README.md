@@ -16,8 +16,9 @@ geometry), then write it out as:
 | 3MF       | `render3mf`       | `.3mf`   | 3D printing, multi-colour                              |
 
 It has no DOM or framework code, so it runs the same in the browser, in Node
-(20.19+), and in Bun. Its one runtime dependency is
-[earcut](https://github.com/mapbox/earcut), which triangulates the 3D formats. It was extracted from the
+(20.19+), and in Bun. Its runtime dependencies are
+[earcut](https://github.com/mapbox/earcut) and
+[polygon-clipping](https://github.com/mfogel/polygon-clipping), for the 3D formats. It was extracted from the
 [Maker Template Pro](https://github.com/RichardMcQuiston01/maker-template-pro)
 tools, where every tool exports through it.
 
@@ -150,7 +151,8 @@ colour, so every body goes into one solid. `render3mf` keeps each body as a
 separate part coloured after its layer, grouped as one object, so a slicer can
 print the engraving in a second filament. Both return bytes, so wrap them in a
 `Blob` (`STL_MIME`, `THREE_MF_MIME`) to download. Output is millimetres and
-z-up, and every body is a closed, manifold solid.
+z-up, and every body is a closed, manifold solid: touching shapes are merged
+and overlaps follow the even-odd rule (as an even-odd SVG fill draws them).
 
 Open paths enclose no area, so they're skipped, as is text unless you pass an
 `outliner`. `docToMeshes(doc, options)` returns the triangles themselves,

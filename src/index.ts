@@ -62,6 +62,7 @@ export {
   docToMeshes,
   extrudeShapes,
   ringsToShapes,
+  regionShapes,
   triangulateShape,
   triangleNormal,
   ringSignedArea,
