@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-05
+
+### Added
+
+- **3D printing export:** `renderStl` (binary), `renderStlAscii` and
+  `render3mf` extrude a design into solids. The cut layers become a base plate
+  (`thicknessMm`, default 3 mm, holes kept open even-odd), and each engrave
+  layer becomes raised artwork (`engraveHeightMm`, default 1 mm). 3MF keeps
+  each body as its own coloured part for multi-colour printing. Text is
+  extruded when an `outliner` is given.
+- `docToMeshes` and the mesh helpers behind it (`ringsToShapes`,
+  `triangulateShape`, `extrudeShapes`, `triangleNormal`), plus a small stored
+  ZIP writer (`createZip`, `crc32`).
+
+### Changed
+
+- First runtime dependency: `earcut`, for triangulation.
+- Node 20.19 or later is now required (was 18), because `earcut` is
+  ESM-only and the CommonJS build loads it with `require`.
+
 ## [0.1.1] - 2026-10-05
 
 First release published to npm. (`v0.1.0` was tagged, but its publish

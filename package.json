@@ -1,7 +1,7 @@
 {
   "name": "@richardmcquiston01/maker-export",
-  "version": "0.1.1",
-  "description": "Framework-free export engine for maker tools: one neutral design model written out as SVG, DXF, LightBurn, and xTool XCS cut/engrave files.",
+  "version": "0.2.0",
+  "description": "Framework-free export engine for maker tools: one neutral design model written out as SVG, DXF, LightBurn, and xTool XCS cut/engrave files, or extruded to STL and 3MF for 3D printing.",
   "keywords": [
     "laser-cutting",
     "vinyl-cutting",
@@ -11,6 +11,9 @@
     "lightburn",
     "xtool",
     "xcs",
+    "stl",
+    "3mf",
+    "3d-printing",
     "export"
   ],
   "license": "Apache-2.0",
@@ -42,7 +45,7 @@
     "access": "public"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20.19"
   },
   "scripts": {
     "build": "tsup",
@@ -66,5 +69,8 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.70.1",
     "vitest": "^5.0.2"
+  },
+  "dependencies": {
+    "earcut": "^3.2.4"
   }
 }
