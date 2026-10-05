@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-05
+
+First release published to npm. (`v0.1.0` was tagged, but its publish
+failed, so 0.1.0 never reached the registry.)
+
 ### Added
 
 - Synced with Maker Template Pro's export core:
