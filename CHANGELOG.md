@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **3D export of touching or overlapping artwork:** shapes that share an edge
+  (QR modules, board squares) or overlap (motif strokes) made non-manifold
+  STL/3MF meshes. Each layer is now resolved into clean regions first: an
+  even-odd boolean merges touching shapes, overlaps follow the even-odd rule as
+  in an even-odd SVG fill, and letter counters stay open. Where two pieces still
+  meet at a single corner, each is pulled 0.001 mm apart. `regionShapes` is
+  exported.
+
+### Changed
+
+- New runtime dependency: `polygon-clipping`, for the region boolean.
+
 ## [0.3.0] - 2026-10-05
 
 ### Added
