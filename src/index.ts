@@ -44,3 +44,27 @@ export {
   type AtommExportResult,
   type AtommFile,
 } from './atomm.ts'
+export {
+  docToMeshes,
+  extrudeShapes,
+  ringsToShapes,
+  triangulateShape,
+  triangleNormal,
+  ringSignedArea,
+  DEFAULT_THICKNESS_MM,
+  DEFAULT_ENGRAVE_HEIGHT_MM,
+  type Mesh,
+  type Model3d,
+  type Model3dOptions,
+  type Shape2D,
+  type Triangle,
+  type Vec3,
+} from './mesh.ts'
+export { renderStl, renderStlAscii, STL_MIME, type StlOptions } from './stl.ts'
+export {
+  render3mf,
+  render3mfModel,
+  THREE_MF_MIME,
+  type ThreeMfOptions,
+} from './threemf.ts'
+export { createZip, crc32, type ZipEntry } from './zip.ts'
