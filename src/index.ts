@@ -8,7 +8,12 @@
  * it runs the same in the browser, Node, and Bun.
  */
 export * from './types.ts'
-export { renderSvg, escapeXml } from './svg.ts'
+export {
+  renderSvg,
+  escapeXml,
+  type SvgOptions,
+  type SvgProfile,
+} from './svg.ts'
 export { renderDxf } from './dxf.ts'
 export { renderLightBurn } from './lightburn.ts'
 export { renderXcs } from './xcs.ts'
@@ -31,3 +36,11 @@ export {
   type ExportFile,
   type ExportOptions,
 } from './multimodal.ts'
+export {
+  exportForAtomm,
+  findAtommSvgIssues,
+  type AtommExportIntent,
+  type AtommExportOptions,
+  type AtommExportResult,
+  type AtommFile,
+} from './atomm.ts'
