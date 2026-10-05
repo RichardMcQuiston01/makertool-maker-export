@@ -70,6 +70,13 @@ export interface ExportLayer {
   machine?: MachineTarget
   /** Colour override; defaults to {@link LAYER_COLOR} for the kind. */
   color?: string
+  /**
+   * Fill-engrave this layer: closed paths (and text) are painted solid instead
+   * of stroked. Honoured by the SVG writer only; DXF/LightBurn/XCS still write
+   * the outlines. Applies to the whole layer, so a tool that mixes filled and
+   * stroked engraving puts them on separate layers.
+   */
+  fill?: boolean
 }
 
 /** A complete design ready to export: sheet size plus its layers. */
@@ -88,6 +95,18 @@ export const LAYER_COLOR: Record<ExportLayerKind, string> = {
   cut: '#0000ff',
   engrave: '#000000',
 }
+
+/**
+ * Atomm's processing colours. The platform reads intent from
+ * colour in the exported SVG: a red stroke is a cut, a blue stroke is a line
+ * engrave, and a blue fill is a fill engrave. Every other colour still exports,
+ * but the user must assign its processing type by hand.
+ */
+export const ATOMM_COLOR = {
+  cut: '#FE0002',
+  lineEngrave: '#2366FF',
+  fillEngrave: '#2366FF',
+} as const
 
 /** Human-facing layer name per kind (used in DXF/LightBurn layer tables). */
 export const LAYER_NAME: Record<ExportLayerKind, string> = {
