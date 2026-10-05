@@ -108,16 +108,18 @@ SVG writer places live text.
 - `flattenStrokes(commands)` does the same, but keeps open subpaths open (a
   leaf's vein, for example) and marks each path's `closed` flag.
 
-## Development
+## Buy Me a Coffee
 
-```sh
-npm install
-npm run lint && npm run typecheck && npm test && npm run build
-```
+If this app, code, or repository has helped you or someone you know, please consider donating. I appreciate any help to offset the costs of development and/or AI Credits.
 
-Releases are published to npm by the **Publish to npm** workflow when a
-`v*` tag is pushed (it needs an `NPM_TOKEN` repository secret).
+[**Donate via Stripe**](https://donate.stripe.com/00w5kD3Gj1Xo9v7gVOcs800), or scan:
+
+[![Donate via Stripe](https://raw.githubusercontent.com/RichardMcQuiston01/makertool-maker-export/main/donate.svg)](https://donate.stripe.com/00w5kD3Gj1Xo9v7gVOcs800)
 
 ## License
 
-[Apache-2.0](./LICENSE)
+Apache 2.0 — see [LICENSE](https://github.com/RichardMcQuiston01/makertool-maker-export/blob/main/LICENSE).
+
+## Copyright
+
+(c)2026 Richard McQuiston. All rights reserved.
