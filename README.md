@@ -12,13 +12,15 @@ geometry), then write it out as:
 | xTool XCS | `renderXcs`       | `.xcs`   | xTool Creative Space                                   |
 | HPGL      | `renderHpgl`      | `.plt`   | Vinyl and drag-knife cutters, pen plotters             |
 | PDF       | `renderPdf`       | `.pdf`   | Shops, print-driver lasers (Epilog, Trotec, Glowforge) |
+| G-code    | `renderGcode`     | `.nc`    | CNC routers; plasma, waterjet and other torch cutters  |
 | STL       | `renderStl`       | `.stl`   | 3D printing: any slicer                                |
 | 3MF       | `render3mf`       | `.3mf`   | 3D printing, multi-colour                              |
 
 It has no DOM or framework code, so it runs the same in the browser, in Node
 (20.19+), and in Bun. Its runtime dependencies are
 [earcut](https://github.com/mapbox/earcut) and
-[polygon-clipping](https://github.com/mfogel/polygon-clipping), for the 3D formats. It was extracted from the
+[polygon-clipping](https://github.com/mfogel/polygon-clipping), for the 3D formats, and
+[clipper-lib](https://github.com/junmer/clipper-lib), for G-code tool offsets. It was extracted from the
 [Maker Template Pro](https://github.com/RichardMcQuiston01/maker-template-pro)
 tools, where every tool exports through it.
 
@@ -184,6 +186,78 @@ generateExportFiles(doc, {
 
 `fitArcs(points, closed, tolerance)` is exported for writers of other
 formats.
+
+### CNC routers and torch cutters (G-code)
+
+`renderGcode(doc, options)` writes a ready-to-run profile-cutting program
+(no pocketing or V-carving), in millimetres, absolute, with X0 Y0 at the
+sheet's bottom-left corner and Z0 at the top of the stock.
+
+- **Cut** layers: closed paths are combined even-odd into parts and holes and
+  offset by the tool radius (router) or half the kerf (torch), so parts come
+  out at size: outlines are cut outside the line, holes inside. Holes narrower
+  than the tool are left out, with a warning. Open cut paths are followed on
+  the line. `compensation: 'none'` cuts every path on the line.
+- **Engrave** layers (router only) are followed on the line at
+  `engraveDepthMm`, e.g. with a V-bit.
+- Order: engraving, open cuts, every hole, then every outline, so parts stay
+  held by the sheet until last; within each group the nearest cut is next.
+- Curves are `G2`/`G3` arcs (fitted with `fitArcs`; `arcs: false` for lines
+  only).
+
+| Option                | Router default        | Torch default | Notes                            |
+| --------------------- | --------------------- | ------------- | -------------------------------- |
+| `process`             | `'router'`            | `'torch'`     |                                  |
+| `toolDiameterMm`      | 3.175 (1/8″)          | —             |                                  |
+| `kerfMm`              | —                     | 1.5           |                                  |
+| `materialThicknessMm` | 6                     | —             | Sets the default cut depth       |
+| `cutDepthMm`          | thickness + 0.3       | —             | Cuts through into the spoilboard |
+| `stepDownMm`          | 1.5                   | —             | Depth per pass                   |
+| `engraveDepthMm`      | 0.5                   | —             |                                  |
+| `safeZMm`             | 5                     | —             | Travel height                    |
+| `feedMmPerMin`        | 1000                  | 2500          |                                  |
+| `plungeMmPerMin`      | 300                   | —             |                                  |
+| `spindleRpm`          | 18000                 | —             |                                  |
+| `direction`           | `'conventional'`      | —             | Or `'climb'`                     |
+| `tabs`                | 4 × 6 mm, 1.5 mm high | off           | `false` for none                 |
+| `pierceDelayS`        | —                     | 0.5           | Dwell after `M3`                 |
+| `leadInMm`            | —                     | 2             | From the scrap side              |
+
+A router program starts the spindle (`S… M3`), cuts each contour in passes of
+`stepDownMm` down to `cutDepthMm`, and lifts over holding tabs on the outlines'
+deepest passes. A torch program switches the torch with `M3`/`M5`, pierces
+off the part (in the slug for a hole, outside an outline), dwells for
+`pierceDelayS`, and leads in to the contour. Torch height control is left to
+the machine. Bad settings (a zero tool diameter, a negative feed) throw an
+`Error` that names the setting.
+
+`planGcode(doc, options)` returns the toolpaths and warnings without writing
+the program, for previews and for showing warnings before export; the
+warnings are also written as comments at the top of the program. Text is cut
+only when outlined (pass `outliner`, or export through `generateExportFiles`
+with one).
+
+```ts
+renderGcode(doc, { toolDiameterMm: 6.35, materialThicknessMm: 12 })
+renderGcode(doc, { process: 'torch', kerfMm: 1.2, feedMmPerMin: 3000 })
+// or, through the multi-format API (CNC layers can now pick 'gcode'):
+generateExportFiles(
+  doc,
+  {
+    mode: 'split',
+    baseName: 'part',
+    formats: { cnc: ['gcode'] },
+    formatOptions: { gcode: { process: 'torch' } },
+  },
+  outliner,
+)
+```
+
+> **Check every setting against your machine and material before running a
+> program.** The defaults are a starting point for a hobby router in 6 mm
+> plywood; wrong feeds, depths or tool sizes break bits and ruin stock. Dry-run
+> or simulate the program first (for example in CAMotics or NC Viewer). `G4 P`
+> dwells are in seconds, as in Grbl and LinuxCNC.
 
 ### Vinyl cutters (HPGL)
 
