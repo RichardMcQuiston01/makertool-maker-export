@@ -28,6 +28,22 @@ export {
   type HpglOptions,
 } from './hpgl.ts'
 export { renderPdf, PDF_MIME, type PdfOptions } from './pdf.ts'
+export {
+  renderGcode,
+  planGcode,
+  resolveGcodeOptions,
+  segmentLength,
+  GCODE_MIME,
+  type CutDirection,
+  type GcodeOperation,
+  type GcodeOperationKind,
+  type GcodeOptions,
+  type GcodePlan,
+  type GcodeProcess,
+  type GcodeTabs,
+  type ResolvedGcodeOptions,
+  type ToolpathSegment,
+} from './gcode.ts'
 export { renderLightBurn } from './lightburn.ts'
 export { renderXcs } from './xcs.ts'
 export {
