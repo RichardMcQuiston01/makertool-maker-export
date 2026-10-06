@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-06
+
+### Added
+
+- **G-code for CNC routers and torch cutters:** `renderGcode(doc, options)`
+  writes a profile-cutting program (`.nc`). Parts and holes are offset by the
+  tool radius or half the kerf so they come out at size, holes are cut before
+  outlines, and curves are `G2`/`G3` arcs. Routers get depth passes, holding
+  tabs, conventional or climb milling and centreline engraving; plasma,
+  waterjet and other torch cutters get `M3`/`M5`, a pierce delay and a lead-in
+  from the scrap side. `planGcode` returns the toolpaths and warnings (holes
+  narrower than the tool, text left out, parts too small for tabs) without
+  writing the program. Settings are checked, and bad ones throw an error that
+  names them.
+- `generateExportFiles` writes the `gcode` format (`.nc`, `text/x-gcode`),
+  with `formatOptions.gcode`. It's in `ALL_FORMATS` and allowed for CNC
+  layers; text is outlined first when an outliner is passed.
+
+### Changed
+
+- New runtime dependency: `clipper-lib`, for G-code tool offsets.
+
 ## [0.3.1] - 2026-10-05
 
 ### Fixed

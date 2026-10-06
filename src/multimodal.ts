@@ -12,6 +12,7 @@
  * — the `machineTypeFileFormats` catalog it mirrors isn't populated yet.
  */
 import { renderDxf, type DxfOptions } from './dxf.ts'
+import { GCODE_MIME, renderGcode, type GcodeOptions } from './gcode.ts'
 import { HPGL_MIME, renderHpgl, type HpglOptions } from './hpgl.ts'
 import { renderLightBurn } from './lightburn.ts'
 import { PDF_MIME, renderPdf, type PdfOptions } from './pdf.ts'
@@ -29,7 +30,7 @@ export type { TextOutliner }
 
 /** The file formats the export core can write. */
 export type ExportFormatId =
-  'svg' | 'dxf' | 'lightburn' | 'xcs' | 'hpgl' | 'pdf'
+  'svg' | 'dxf' | 'lightburn' | 'xcs' | 'hpgl' | 'pdf' | 'gcode'
 
 /** Per-format writer options, for the formats that take any. */
 export interface FormatOptions {
@@ -37,6 +38,7 @@ export interface FormatOptions {
   dxf?: DxfOptions
   hpgl?: HpglOptions
   pdf?: PdfOptions
+  gcode?: GcodeOptions
 }
 
 interface FormatSpec {
@@ -96,6 +98,13 @@ export const FILE_FORMATS: Record<ExportFormatId, FormatSpec> = {
     render: (doc, options) => renderPdf(doc, options.pdf),
     outlinesText: false,
   },
+  gcode: {
+    label: 'G-code',
+    extension: 'nc',
+    mime: GCODE_MIME,
+    render: (doc, options) => renderGcode(doc, options.gcode),
+    outlinesText: true,
+  },
 }
 
 /** Every format id, in display order. */
@@ -106,12 +115,13 @@ export const ALL_FORMATS: ExportFormatId[] = [
   'xcs',
   'hpgl',
   'pdf',
+  'gcode',
 ]
 
 /** Formats each machine target can export to (its software's supported set). */
 export const MACHINE_FORMATS: Record<MachineTarget, ExportFormatId[]> = {
   laser: ['svg', 'dxf', 'lightburn', 'xcs', 'pdf'],
-  cnc: ['dxf', 'svg', 'pdf'],
+  cnc: ['dxf', 'svg', 'pdf', 'gcode'],
   vinyl: ['svg', 'dxf', 'hpgl', 'pdf'],
   'uv-print': ['svg', 'pdf'],
   print: ['svg', 'pdf'],
@@ -170,7 +180,7 @@ function fileFor(
 /**
  * Produce the export file set for a document. Formats not valid for a machine
  * (in split mode) are dropped, and duplicates are ignored, so callers can pass a
- * loose selection. Pass `outliner` to vectorise text for LightBurn/XCS/HPGL
+ * loose selection. Pass `outliner` to vectorise text for LightBurn/XCS/HPGL/G-code
  * (SVG/DXF/PDF keep native, editable text either way).
  */
 export function generateExportFiles(
