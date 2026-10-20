@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-20
+
+### Added
+
+- `funding` entry in `package.json`, so `npm fund` and the npm page link to
+  the Stripe donation page.
+
 ## [0.4.0] - 2026-10-06
 
 ### Added
