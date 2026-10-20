@@ -1,6 +1,6 @@
 {
   "name": "@richardmcquiston01/maker-export",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Framework-free export engine for maker tools: one neutral design model written out as SVG, DXF, PDF, HPGL, LightBurn, and xTool XCS cut/engrave files, or extruded to STL and 3MF for 3D printing.",
   "keywords": [
     "laser-cutting",
@@ -44,6 +44,10 @@
   "homepage": "https://github.com/RichardMcQuiston01/makertool-maker-export#readme",
   "bugs": {
     "url": "https://github.com/RichardMcQuiston01/makertool-maker-export/issues"
+  },
+  "funding": {
+    "type": "individual",
+    "url": "https://donate.stripe.com/00w5kD3Gj1Xo9v7gVOcs800"
   },
   "publishConfig": {
     "access": "public"
