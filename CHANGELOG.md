@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-11-06
+
+### Changed
+
+- The `funding` entry in `package.json` and the README donate link now point
+  to PayPal instead of the closed Stripe donation page. The README QR code
+  (`donate.png`) is regenerated to match. No library code changed.
+
 ## [0.4.1] - 2026-10-20
 
 ### Added
