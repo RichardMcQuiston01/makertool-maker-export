@@ -11,9 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- The `funding` entry in `package.json` and the README donate link now point
-  to PayPal instead of the closed Stripe donation page. The README QR code
-  (`donate.png`) is regenerated to match. No library code changed.
+- Donations now point at Ko-fi instead of the closed Stripe page: the README
+  badge, the `package.json` `funding` link and a new `.github/FUNDING.yml`. The
+  QR image (`donate.png`) is removed. No library code changed.
 
 ## [0.4.1] - 2026-10-20
 
