@@ -288,9 +288,7 @@ string like the other formats.
 
 If this app, code, or repository has helped you or someone you know, please consider donating. I appreciate any help to offset the costs of development and/or AI Credits.
 
-[**Donate via Stripe**](https://donate.stripe.com/00w5kD3Gj1Xo9v7gVOcs800), or scan:
-
-[![Donate via Stripe](https://raw.githubusercontent.com/RichardMcQuiston01/makertool-maker-export/main/donate.svg)](https://donate.stripe.com/00w5kD3Gj1Xo9v7gVOcs800)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/P1V529Z7ZP)
 
 ## License
 
